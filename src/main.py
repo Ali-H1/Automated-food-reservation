@@ -1,6 +1,6 @@
 from api import ShahedFoodApi
+from json import dumps
 from utils import write_file, write_file_bin
-
 
 
 if __name__ == "__main__":
@@ -18,7 +18,5 @@ if __name__ == "__main__":
         input("read capcha: "))
 
     print(sfa.credit())
-    # print(sfa.get_food())
-    print("done")
-
-    write_file("../temp/data.json", sfa.reservation())
+    weekProgram = sfa.reservation()
+    write_file("../temp/data1.json", dumps(weekProgram, ensure_ascii=False))

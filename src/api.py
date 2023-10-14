@@ -189,10 +189,6 @@ class ShahedFoodApi:
         """
         return self.c.get(f"{apiv0}/ReservationFinancial?state={state}").content
 
-    def get_food(self, data):
-        response = self.c.post(f"{baseUrl}/#!/Reservation", data=data)
-        return json.loads(response.content)
-
     def reservation(self, week: int = 0) -> dict:
         return json.loads(self.c.get(f"{apiv0}/Reservation?lastdate=&navigation={week*7}").content)
 
