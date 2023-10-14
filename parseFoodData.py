@@ -4,26 +4,27 @@ import json
 
 def parse_data(data):
     f = open('parsed_data.txt', 'w', encoding='utf-8')
-    data = data["ArrayOfDietMenu"]["DietMenu"]
+    data = json.loads(data)
+    # data = data["ArrayOfDietMenu"]["DietMenu"]
     dayId={'شنبه':2,'یکشنبه':5,'دوشنبه':8,'سه شنبه':11,'چهارشنبه':14}
     parsed_list = []
     for day in data:
         food = dict()
-        food["Date"] = day["Meals"]["d3p1:MealMenu"][1]["d3p1:Date"]
+        food["Date"] = day["Meals"] [1][ "Date"]
         food["MealId"] = 2
-        if len(day["Meals"]["d3p1:MealMenu"][1]["d3p1:FoodMenu"]["d3p1:FoodMenu"])==2:
-            food["FoodName"] = day["Meals"]["d3p1:MealMenu"][1]["d3p1:FoodMenu"]["d3p1:FoodMenu"][0]["d3p1:FoodName"] if day["Meals"]["d3p1:MealMenu"][1]["d3p1:FoodMenu"]["d3p1:FoodMenu"][0]["d3p1:SelfMenu"]["d3p1:SelfMenu"]["d3p1:Price"] > day["Meals"]["d3p1:MealMenu"][1]["d3p1:FoodMenu"]["d3p1:FoodMenu"][1]["d3p1:SelfMenu"]["d3p1:SelfMenu"]["d3p1:Price"] else day["Meals"]["d3p1:MealMenu"][1]["d3p1:FoodMenu"]["d3p1:FoodMenu"][1]["d3p1:FoodName"]
-            food["FoodId"] = day["Meals"]["d3p1:MealMenu"][1]["d3p1:FoodMenu"]["d3p1:FoodMenu"][0]["d3p1:FoodId"] if day["Meals"]["d3p1:MealMenu"][1]["d3p1:FoodMenu"]["d3p1:FoodMenu"][0]["d3p1:SelfMenu"]["d3p1:SelfMenu"]["d3p1:Price"] > day["Meals"]["d3p1:MealMenu"][1]["d3p1:FoodMenu"]["d3p1:FoodMenu"][1]["d3p1:SelfMenu"]["d3p1:SelfMenu"]["d3p1:Price"] else day["Meals"]["d3p1:MealMenu"][1]["d3p1:FoodMenu"]["d3p1:FoodMenu"][1]["d3p1:FoodId"]
+        if len(day["Meals"] [1] ["FoodMenu"])==2:
+            food["FoodName"] = day["Meals"] [1] ["FoodMenu"][0][ "FoodName"] if day["Meals"] [1] ["FoodMenu"][0]["SelfMenu"][0][ "Price"] > day["Meals"] [1] ["FoodMenu"][1]["SelfMenu"][0][ "Price"] else day["Meals"] [1] ["FoodMenu"][1][ "FoodName"]
+            food["FoodId"] = day["Meals"] [1] ["FoodMenu"][0][ "FoodId"] if day["Meals"] [1] ["FoodMenu"][0]["SelfMenu"][0][ "Price"] > day["Meals"] [1] ["FoodMenu"][1]["SelfMenu"][0][ "Price"] else day["Meals"] [1] ["FoodMenu"][1][ "FoodId"]
         else:
-            food["FoodName"] = day["Meals"]["d3p1:MealMenu"][1]["d3p1:FoodMenu"]["d3p1:FoodMenu"]["d3p1:FoodName"]
-            food["FoodId"] = day["Meals"]["d3p1:MealMenu"][1]["d3p1:FoodMenu"]["d3p1:FoodMenu"]["d3p1:FoodId"]
+            food["FoodName"] = day["Meals"] [1] ["FoodMenu"][0][ "FoodName"]
+            food["FoodId"] = day["Meals"] [1] ["FoodMenu"][0][ "FoodId"]
         food["SelfId"] = 1
         food["LastCounts"] = 0
         food["Counts"] = 1
-        if len(day["Meals"]["d3p1:MealMenu"][1]["d3p1:FoodMenu"]["d3p1:FoodMenu"])==2:
-            food["Price"] = day["Meals"]["d3p1:MealMenu"][1]["d3p1:FoodMenu"]["d3p1:FoodMenu"][0]["d3p1:SelfMenu"]["d3p1:SelfMenu"]["d3p1:Price"] if day["Meals"]["d3p1:MealMenu"][1]["d3p1:FoodMenu"]["d3p1:FoodMenu"][0]["d3p1:SelfMenu"]["d3p1:SelfMenu"]["d3p1:Price"] > day["Meals"]["d3p1:MealMenu"][1]["d3p1:FoodMenu"]["d3p1:FoodMenu"][1]["d3p1:SelfMenu"]["d3p1:SelfMenu"]["d3p1:Price"] else day["Meals"]["d3p1:MealMenu"][1]["d3p1:FoodMenu"]["d3p1:FoodMenu"][1]["d3p1:SelfMenu"]["d3p1:SelfMenu"]["d3p1:Price"]
+        if len(day["Meals"] [1] ["FoodMenu"])==2:
+            food["Price"] = day["Meals"] [1] ["FoodMenu"][0]["SelfMenu"][0][ "Price"] if day["Meals"] [1] ["FoodMenu"][0]["SelfMenu"][0][ "Price"] > day["Meals"] [1] ["FoodMenu"][1]["SelfMenu"][0][ "Price"] else day["Meals"] [1] ["FoodMenu"][1]["SelfMenu"][0][ "Price"]
         else:
-            food["Price"] = day["Meals"]["d3p1:MealMenu"][1]["d3p1:FoodMenu"]["d3p1:FoodMenu"]["d3p1:SelfMenu"]["d3p1:SelfMenu"]["d3p1:Price"]
+            food["Price"] = day["Meals"] [1] ["FoodMenu"][0]["SelfMenu"][0][ "Price"]
         food["SobsidPrice"] = 0
         food["PriceType"] = 2
         food["State"] = 0
@@ -38,8 +39,8 @@ def parse_data(data):
         food["DayIndex"] = day["DayId"]
         food["MealIndex"] = 1
         food['Id'] = dayId[food["DayName"]]
-        if len(day["Meals"]["d3p1:MealMenu"][1]["d3p1:FoodMenu"]["d3p1:FoodMenu"])==2:
-            food["Row"] = 3 if day["Meals"]["d3p1:MealMenu"][1]["d3p1:FoodMenu"]["d3p1:FoodMenu"][0]["d3p1:FoodName"] == food['FoodName'] else 2
+        if len(day["Meals"] [1] ["FoodMenu"])==2:
+            food["Row"] = 3 if day["Meals"] [1] ["FoodMenu"][0][ "FoodName"] == food['FoodName'] else 2
         else:
             food["Row"] = 2
         parsed_list.append(food)
@@ -51,6 +52,7 @@ def parse_data(data):
             break
 
     f.close()
+    return parsed_list
 
 def xmlToJson(xml):
     data_dict = xmltodict.parse(xml)

@@ -2,6 +2,7 @@ from requests import Session as HttpSession
 from random import randint
 import json
 from bs4 import BeautifulSoup
+from parseFoodData import parse_data
 
 baseUrl = "https://food.shahed.ac.ir"
 apiv0 = baseUrl + "/api/v0"
@@ -121,18 +122,19 @@ def freshCaptchaUrl() -> str:
 
 class ShahedFoodApi:
     def __init__(self) -> None:
-        self.c = HttpSession()
-
+        self.currentSession = HttpSession()
+        self.signedIn = False
+        
     def loginBeforeCaptcha(self):
         """
         returns tuple of [login_data: dict, captcha_binary: bstr]
         """
-        resp = self.c.get(baseUrl)
+        resp = self.currentSession.get(baseUrl)
         assert resp.status_code in range(200, 300)
 
         a = extractLoginPageData(resp.content)
 
-        r = self.c.get(
+        r = self.currentSession.get(
             freshCaptchaUrl(),
             headers={"Referer": resp.url}
         ).content
@@ -145,7 +147,7 @@ class ShahedFoodApi:
                           loginPageData: dict,
                           uname, passw, capcha: str):
 
-        resp = self.c.post(
+        resp = self.currentSession.post(
             extractLoginUrl(loginPageData),
             data=loginForm(
                 uname, passw, capcha,
@@ -162,14 +164,33 @@ class ShahedFoodApi:
         if url.startswith("{{"):
             raise "login failed"
         else:
-            resp = self.c.post(url, data=inputs)
+            resp = self.currentSession.post(url, data=inputs)
             assert resp.status_code in range(200, 300)
+            self.signedIn = True
 
     def getCredit(self) -> int:
         """
         returns the credit in Rials
         """
-        return int(self.c.get(apiv0 + "/Credit").content)
+        return int(self.currentSession.get(apiv0 + "/Credit").content)
+    
+    def getFood(self):
+        api_url = f"{apiv0}/Reservation?lastdate=1402%2F07%2F22&navigation=0"
+        headers = {
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "accept-language": "en-US,en;q=0.9,fa;q=0.8",
+            "cache-control": "max-age=0",
+            "sec-ch-ua": "\"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"114\", \"Google Chrome\";v=\"114\"",
+            "sec-ch-ua-mobile": "?1",
+            "sec-ch-ua-platform": "\"Android\"",
+            "sec-fetch-dest": "document",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "none",
+            "sec-fetch-user": "?1",
+            "upgrade-insecure-requests": "1"
+        }
+        response = self.currentSession.get(api_url)
+        return parse_data(response.content.decode('utf8').replace("'", '"'))
 
 
 if __name__ == "__main__":
@@ -187,3 +208,4 @@ if __name__ == "__main__":
         input("read capcha: "))
 
     print(sfa.getCredit())
+    print(sfa.getFood())
