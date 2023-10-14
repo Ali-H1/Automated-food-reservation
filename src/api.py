@@ -197,13 +197,13 @@ class ShahedFoodApi:
             all = 1
             last = 2
         """
-        return self.c.get(f"{apiv0}/ReservationFinancial?state={state.int}").content
+        return self.c.get(f"{apiv0}/ReservationFinancial?state={state}").content
 
     def reservation(self, week: int) -> dict:
         return self.c.get(f"{apiv0}/Reservation?lastdate=&navigation={week*7}").content
 
     def registerInvoice(self, bid, amount: int) -> dict:
-        return self.c.get(f"{apiv0}/Chargecard?IpgBankId={bid}&amount={amount.int}").content
+        return self.c.get(f"{apiv0}/Chargecard?IpgBankId={bid}&amount={amount}").content
 
     def prepareBankTransaction(self, invoiceId: int, amount: int) -> dict:
         data = {
