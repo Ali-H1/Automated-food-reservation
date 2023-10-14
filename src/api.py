@@ -187,7 +187,7 @@ class ShahedFoodApi:
             all = 1
             last = 2
         """
-        return self.c.get(f"{apiv0}/ReservationFinancial?state={state}").content
+        return json.loads(self.c.get(f"{apiv0}/ReservationFinancial?state={state}").content)
 
     def reservation(self, week: int = 0) -> dict:
         return json.loads(self.c.get(f"{apiv0}/Reservation?lastdate=&navigation={week*7}").content)
