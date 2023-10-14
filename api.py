@@ -1,9 +1,6 @@
-import html
 from requests import Session as HttpSession
 from random import randint
 import json
-from urllib.parse import urlencode
-import re
 from bs4 import BeautifulSoup
 
 baseUrl = "https://food.shahed.ac.ir"
@@ -55,6 +52,12 @@ def entity_to_utf8(entity: str):
     return entity.replace("&quot;", '"')
 
 
+def write_file_bin(path, bstr):
+    f = open(path, "wb")
+    f.write(bstr)
+    f.close()
+
+
 def extractLoginPageData(htmlPage: str) -> dict:
     headSig = b"{&quot;loginUrl&quot"
     tailSig = b",&quot;custom&quot;:null}"
@@ -78,8 +81,7 @@ def loginForm(user, passw, captcha, token: str):
         "username": user,
         "password": passw,
         "Captcha": captcha,
-        "idsrv.xsrf": token
-    }
+        "idsrv.xsrf": token}
 
 
 def cleanLoginCaptcha(binary: str) -> str:
@@ -117,63 +119,71 @@ def freshCaptchaUrl() -> str:
     return apiv0 + "/Captcha?id=" + str(randint(1, 10000))
 
 
-# tuple[loginPageData: dict, captchaBinary: str] =
-def loginBeforeCaptcha(c: HttpSession):
-    resp = c.get(baseUrl)
-    assert resp.status_code in range(200, 300)
+class ShahedFoodApi:
+    def __init__(self) -> None:
+        self.c = HttpSession()
 
-    a = extractLoginPageData(resp.content)
-
-    r = c.get(
-        freshCaptchaUrl(),
-        headers={"Referer": resp.url}
-    ).content
-
-    b = cleanLoginCaptcha(r)
-
-    return (a, b)
-
-
-def loginAfterCaptcha(c: HttpSession,
-                      loginPageData: dict,
-                      uname, passw, capcha: str):
-
-    resp = c.post(
-        extractLoginUrl(loginPageData),
-        data=loginForm(
-            uname, passw, capcha,
-            extractLoginXsrfToken(loginPageData)
-        ))
-
-    assert resp.status_code in range(200, 300)
-
-    html = BeautifulSoup(resp.text, "html.parser")
-    form = html.find("form")
-    url = form["action"]
-    inputs = [(el["name"], el["value"]) for el in form.find_all("input")]
-
-    if url.startswith("{{"):
-        raise "login failed"
-    else:
-        resp = c.post(url, data=inputs)
+    def loginBeforeCaptcha(self):
+        """
+        returns tuple of [login_data: dict, captcha_binary: bstr]
+        """
+        resp = self.c.get(baseUrl)
         assert resp.status_code in range(200, 300)
 
+        a = extractLoginPageData(resp.content)
 
-def getCredit(c: HttpSession):
-    return c.get(apiv0 + "/Credit").content
+        r = self.c.get(
+            freshCaptchaUrl(),
+            headers={"Referer": resp.url}
+        ).content
+
+        b = cleanLoginCaptcha(r)
+
+        return (a, b)
+
+    def loginAfterCaptcha(self,
+                          loginPageData: dict,
+                          uname, passw, capcha: str):
+
+        resp = self.c.post(
+            extractLoginUrl(loginPageData),
+            data=loginForm(
+                uname, passw, capcha,
+                extractLoginXsrfToken(loginPageData)
+            ))
+
+        assert resp.status_code in range(200, 300)
+
+        html = BeautifulSoup(resp.text, "html.parser")
+        form = html.find("form")
+        url = form["action"]
+        inputs = [(el["name"], el["value"]) for el in form.find_all("input")]
+
+        if url.startswith("{{"):
+            raise "login failed"
+        else:
+            resp = self.c.post(url, data=inputs)
+            assert resp.status_code in range(200, 300)
+
+    def getCredit(self) -> int:
+        """
+        returns the credit in Rials
+        """
+        return int(self.c.get(apiv0 + "/Credit").content)
 
 
 if __name__ == "__main__":
-    s = HttpSession()
-    (login_data, capcha_binary) = loginBeforeCaptcha(s)
+    """
+    usage 
+    """
+    sfa = ShahedFoodApi()
 
-    f = open("c.png", "wb")
-    f.write(capcha_binary)
-    f.close()
+    (login_data, capcha_binary) = sfa.loginBeforeCaptcha()
+    write_file_bin("c.png", capcha_binary)
 
-    loginAfterCaptcha(
-        s,
-        login_data, "992164012", "@123456789",
+    sfa.loginAfterCaptcha(
+        login_data,
+        "992164012", "@123456789",
         input("read capcha: "))
 
-    print(getCredit(s))
+    print(sfa.getCredit())
