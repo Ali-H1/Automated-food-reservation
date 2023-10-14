@@ -200,3 +200,34 @@ class ShahedFoodApi:
             "amount": amount,
             "Applicant": "web",
             "invoicenumber": invoiceId}).content)
+
+
+def parse_reservation(week_program) -> list:
+    result = []
+    for day_program in week_program:
+        p = {
+            # "DayId": day_program["DayId"],
+            # "DayName": day_program["DayName"],
+            # "GDate": day_program["MiladiDayDate"],
+            # "JDate": day_program["DayDate"],
+            "date": day_program["DayDate"],
+            "foods": [],
+        }
+
+        for meal in day_program["Meals"]:
+            if meal["MealState"] == 0 and "FoodMenu" in meal:
+                for food in meal["FoodMenu"]:
+                    p["foods"].append({
+                        "id": food["FoodId"],
+                        "name": food["FoodName"],
+                        "state": food["FoodState"],
+                        "price": food["SelfMenu"][0]["ShowPrice"],
+                    })
+
+        result.append(p)
+    return result
+
+
+if __name__ == "__main__":
+    f = open("./temp/data1.json", 'r')
+    print(json.dumps(parse_reservation(json.loads(f.read())), ensure_ascii=False))
