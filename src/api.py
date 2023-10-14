@@ -202,10 +202,10 @@ class ShahedFoodApi:
     def reservation(self, week: int) -> dict:
         return self.c.get(f"{apiv0}/Reservation?lastdate=&navigation={week*7}").content
 
-    def registerInvoice(self, bid, amount: int) -> dict:
+    def register_invoice(self, bid, amount: int) -> dict:
         return self.c.get(f"{apiv0}/Chargecard?IpgBankId={bid}&amount={amount}").content
 
-    def prepareBankTransaction(self, invoiceId: int, amount: int) -> dict:
+    def prepare_bank_transaction(self, invoiceId: int, amount: int) -> dict:
         data = {
             "amount": amount,
             "Applicant": "web",
