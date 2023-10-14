@@ -1,4 +1,4 @@
-from apiCall import call_food
+from api import ShahedFoodApi
 from parseFoodData import xmlToJson
 
 def get_foods():

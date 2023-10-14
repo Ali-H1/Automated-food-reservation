@@ -171,15 +171,15 @@ class ShahedFoodApi:
         """
         return int(self.c.get(apiv0 + "/Credit").content)
 
-    def call_food(self, url):
+    def call_food(self):
         api_url = apiv0 + "/Reservation?lastdate=1402%2F03%2F27&navigation=7"
         response = self.c.get(api_url)
-        return response.content
+        return json.loads(response.content)
 
-    def get_food(self, url, data):
-        api_url = "https://food.shahed.ac.ir/#!/Reservation"
+    def get_food(self, data):
+        api_url = baseUrl + "/#!/Reservation"
         response = self.c.post(api_url, data=data)
-        return response.content
+        return json.loads(response.content)
 
 
 if __name__ == "__main__":
