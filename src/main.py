@@ -1,15 +1,6 @@
 from api import ShahedFoodApi
-from utils import write_file_bin
-from parseFoodData import xmlToJson
+from utils import write_file, write_file_bin
 
-
-def get_foods():
-    response = (call_food("a"))
-    print(response)
-    json1 = xmlToJson(response)
-    f = open('data.json', 'w', encoding='utf-8')
-    f.write((json1))
-    f.close()
 
 
 if __name__ == "__main__":
@@ -27,3 +18,7 @@ if __name__ == "__main__":
         input("read capcha: "))
 
     print(sfa.credit())
+    # print(sfa.get_food())
+    print("done")
+
+    write_file("../temp/data.json", sfa.reservation())

@@ -110,7 +110,7 @@ def genRedirectTransactionForm(data: dict):
 
 
 def freshCaptchaUrl() -> str:
-    return apiv0 + "/Captcha?id=" + str(randint(1, 10000))
+    return f"{apiv0}/Captcha?id=" + str(randint(1, 10000))
 
 
 class ShahedFoodApi:
@@ -159,37 +159,27 @@ class ShahedFoodApi:
             resp = self.c.post(url, data=inputs)
             assert resp.status_code in range(200, 300)
 
-    def call_food(self):
-        api_url = apiv0 + "/Reservation?lastdate=1402%2F03%2F27&navigation=7"
-        response = self.c.get(api_url)
-        return json.loads(response.content)
-
-    def get_food(self, data):
-        api_url = baseUrl + "/#!/Reservation"
-        response = self.c.post(api_url, data=data)
-        return json.loads(response.content)
-
     def credit(self) -> int:
         """
         returns the credit in Rials
         """
-        return int(self.c.get(apiv0 + "/Credit").content)
+        return int(self.c.get(f"{apiv0}/Credit").content)
 
     def is_captcha_enabled(self) -> bool:
-        return json.loads(self.c.get(apiv0 + "/Captcha?isactive=wehavecaptcha").content)
+        return json.loads(self.c.get(f"{apiv0}/Captcha?isactive=wehavecaptcha").content)
 
     def personal_info(self) -> dict:
-        return json.loads(self.c.get(apiv0 + "/Student").content)
+        return json.loads(self.c.get(f"{apiv0}/Student").content)
 
     def personal_notifs(self) -> dict:
         return json.loads(self.c.get(
-            apiv0 + "/PersonalNotification?postname=LastNotifications").content)
+            f"{apiv0}/PersonalNotification?postname=LastNotifications").content)
 
     def instant_sale(self) -> dict:
-        return json.loads(self.c.get(apiv0 + "/InstantSale").content)
+        return json.loads(self.c.get(f"{apiv0}/InstantSale").content)
 
     def available_banks(self) -> dict:
-        return json.loads(self.c.get(apiv0 + "/Chargecard").content)
+        return json.loads(self.c.get(f"{apiv0}/Chargecard").content)
 
     def financial_info(self, state=1) -> dict:
         """
@@ -199,16 +189,18 @@ class ShahedFoodApi:
         """
         return self.c.get(f"{apiv0}/ReservationFinancial?state={state}").content
 
-    def reservation(self, week: int) -> dict:
-        return self.c.get(f"{apiv0}/Reservation?lastdate=&navigation={week*7}").content
+    def get_food(self, data):
+        response = self.c.post(f"{baseUrl}/#!/Reservation", data=data)
+        return json.loads(response.content)
+
+    def reservation(self, week: int = 0) -> dict:
+        return json.loads(self.c.get(f"{apiv0}/Reservation?lastdate=&navigation={week*7}").content)
 
     def register_invoice(self, bid, amount: int) -> dict:
-        return self.c.get(f"{apiv0}/Chargecard?IpgBankId={bid}&amount={amount}").content
+        return json.loads(self.c.get(f"{apiv0}/Chargecard?IpgBankId={bid}&amount={amount}").content)
 
     def prepare_bank_transaction(self, invoiceId: int, amount: int) -> dict:
-        data = {
+        return json.loads(self.c.post(f"{apiv0}/Chargecard", data={
             "amount": amount,
             "Applicant": "web",
-            "invoicenumber": invoiceId}
-
-        return json.loads(self.c.post(apiv0 + "/Chargecard", data=data).content)
+            "invoicenumber": invoiceId}).content)
