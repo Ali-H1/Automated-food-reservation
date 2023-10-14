@@ -176,20 +176,20 @@ class ShahedFoodApi:
         return int(self.c.get(apiv0 + "/Credit").content)
 
     def is_captcha_enabled(self) -> bool:
-        json.loads(self.c.get(apiv0 + "/Captcha?isactive=wehavecaptcha").content)
+        return json.loads(self.c.get(apiv0 + "/Captcha?isactive=wehavecaptcha").content)
 
     def personal_info(self) -> dict:
-        json.loads(self.c.get(apiv0 + "/Student").content)
+        return json.loads(self.c.get(apiv0 + "/Student").content)
 
     def personal_notifs(self) -> dict:
-        json.loads(self.c.get(
+        return json.loads(self.c.get(
             apiv0 + "/PersonalNotification?postname=LastNotifications").content)
 
     def instant_sale(self) -> dict:
-        json.loads(self.c.get(apiv0 + "/InstantSale").content)
+        return json.loads(self.c.get(apiv0 + "/InstantSale").content)
 
     def available_banks(self) -> dict:
-        json.loads(self.c.get(apiv0 + "/Chargecard").content)
+        return json.loads(self.c.get(apiv0 + "/Chargecard").content)
 
     def financial_info(self, state=1) -> dict:
         """
@@ -211,4 +211,4 @@ class ShahedFoodApi:
             "Applicant": "web",
             "invoicenumber": invoiceId}
 
-        json.loads(self.c.post(apiv0 + "/Chargecard", data=data).content)
+        return json.loads(self.c.post(apiv0 + "/Chargecard", data=data).content)
