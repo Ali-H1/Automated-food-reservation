@@ -9,10 +9,10 @@ if __name__ == "__main__":
     """
     sfa = ShahedFoodApi()
 
-    (login_data, capcha_binary) = sfa.loginBeforeCaptcha()
+    (login_data, capcha_binary) = sfa.login_before_captcha()
     write_file_bin("./temp/capcha.png", capcha_binary)
 
-    sfa.loginAfterCaptcha(
+    sfa.login_after_captcha(
         login_data,
         "992164012", "@123456789",
         input("read capcha: "))

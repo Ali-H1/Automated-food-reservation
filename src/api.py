@@ -117,7 +117,7 @@ class ShahedFoodApi:
     def __init__(self) -> None:
         self.c = HttpSession()
 
-    def loginBeforeCaptcha(self):
+    def login_before_captcha(self):
         """
         returns tuple of [login_data: dict, captcha_binary: bstr]
         """
@@ -135,7 +135,7 @@ class ShahedFoodApi:
 
         return (a, b)
 
-    def loginAfterCaptcha(self,
+    def login_after_captcha(self,
                           loginPageData: dict,
                           uname, passw, capcha: str):
 
