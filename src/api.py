@@ -227,7 +227,3 @@ def parse_reservation(week_program) -> list:
         result.append(p)
     return result
 
-
-if __name__ == "__main__":
-    f = open("./temp/data1.json", 'r')
-    print(json.dumps(parse_reservation(json.loads(f.read())), ensure_ascii=False))
