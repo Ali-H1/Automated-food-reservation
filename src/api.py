@@ -112,6 +112,8 @@ def genRedirectTransactionForm(data: dict):
 def freshCaptchaUrl() -> str:
     return f"{apiv0}/Captcha?id=" + str(randint(1, 10000))
 
+def to_json(response) -> dict:
+    return json.loads(response.content)
 
 class ShahedFoodApi:
     def __init__(self) -> None:
@@ -163,23 +165,23 @@ class ShahedFoodApi:
         """
         returns the credit in Rials
         """
-        return int(self.c.get(f"{apiv0}/Credit").content)
+        return to_json(self.c.get(f"{apiv0}/Credit"))
 
     def is_captcha_enabled(self) -> bool:
-        return json.loads(self.c.get(f"{apiv0}/Captcha?isactive=wehavecaptcha").content)
+        return to_json(self.c.get(f"{apiv0}/Captcha?isactive=wehavecaptcha"))
 
     def personal_info(self) -> dict:
-        return json.loads(self.c.get(f"{apiv0}/Student").content)
+        return to_json(self.c.get(f"{apiv0}/Student"))
 
     def personal_notifs(self) -> dict:
-        return json.loads(self.c.get(
-            f"{apiv0}/PersonalNotification?postname=LastNotifications").content)
+        return to_json(self.c.get(
+            f"{apiv0}/PersonalNotification?postname=LastNotifications"))
 
     def instant_sale(self) -> dict:
-        return json.loads(self.c.get(f"{apiv0}/InstantSale").content)
+        return to_json(self.c.get(f"{apiv0}/InstantSale"))
 
     def available_banks(self) -> dict:
-        return json.loads(self.c.get(f"{apiv0}/Chargecard").content)
+        return to_json(self.c.get(f"{apiv0}/Chargecard"))
 
     def financial_info(self, state=1) -> dict:
         """
@@ -187,19 +189,19 @@ class ShahedFoodApi:
             all = 1
             last = 2
         """
-        return json.loads(self.c.get(f"{apiv0}/ReservationFinancial?state={state}").content)
+        return to_json(self.c.get(f"{apiv0}/ReservationFinancial?state={state}"))
 
     def reservation(self, week: int = 0) -> dict:
-        return json.loads(self.c.get(f"{apiv0}/Reservation?lastdate=&navigation={week*7}").content)
+        return to_json(self.c.get(f"{apiv0}/Reservation?lastdate=&navigation={week*7}"))
 
     def register_invoice(self, bid, amount: int) -> dict:
-        return json.loads(self.c.get(f"{apiv0}/Chargecard?IpgBankId={bid}&amount={amount}").content)
+        return to_json(self.c.get(f"{apiv0}/Chargecard?IpgBankId={bid}&amount={amount}"))
 
     def prepare_bank_transaction(self, invoiceId: int, amount: int) -> dict:
-        return json.loads(self.c.post(f"{apiv0}/Chargecard", data={
+        return to_json(self.c.post(f"{apiv0}/Chargecard", data={
             "amount": amount,
             "Applicant": "web",
-            "invoicenumber": invoiceId}).content)
+            "invoicenumber": invoiceId}))
 
 
 def parse_reservation(week_program) -> list:
