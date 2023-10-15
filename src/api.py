@@ -215,14 +215,13 @@ def parse_reservation(week_program) -> list:
         }
 
         for meal in day_program["Meals"]:
-            if meal["MealState"] == 0 and "FoodMenu" in meal:
-                for food in meal["FoodMenu"]:
-                    p["foods"].append({
-                        "id": food["FoodId"],
-                        "name": food["FoodName"],
-                        "state": food["FoodState"],
-                        "price": food["SelfMenu"][0]["ShowPrice"],
-                    })
+            for food in meal["FoodMenu"]:
+                p["foods"].append({
+                    "id": food["FoodId"],
+                    "name": food["FoodName"],
+                    "state": food["FoodState"],
+                    "price": food["SelfMenu"][0]["ShowPrice"],
+                })
 
         result.append(p)
     return result
