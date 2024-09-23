@@ -15,9 +15,11 @@ def parse_data(data):
         if len(day["Meals"] [1] ["FoodMenu"])==2:
             food["FoodName"] = day["Meals"] [1] ["FoodMenu"][0][ "FoodName"] if day["Meals"] [1] ["FoodMenu"][0]["SelfMenu"][0][ "Price"] > day["Meals"] [1] ["FoodMenu"][1]["SelfMenu"][0][ "Price"] else day["Meals"] [1] ["FoodMenu"][1][ "FoodName"]
             food["FoodId"] = day["Meals"] [1] ["FoodMenu"][0][ "FoodId"] if day["Meals"] [1] ["FoodMenu"][0]["SelfMenu"][0][ "Price"] > day["Meals"] [1] ["FoodMenu"][1]["SelfMenu"][0][ "Price"] else day["Meals"] [1] ["FoodMenu"][1][ "FoodId"]
-        else:
+        elif len(day["Meals"] [1] ["FoodMenu"])==1:
             food["FoodName"] = day["Meals"] [1] ["FoodMenu"][0][ "FoodName"]
             food["FoodId"] = day["Meals"] [1] ["FoodMenu"][0][ "FoodId"]
+        else:
+            continue
         food["SelfId"] = 1
         food["LastCounts"] = 0
         food["Counts"] = 1

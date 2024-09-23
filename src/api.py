@@ -2,7 +2,7 @@ from requests import Session as HttpSession
 from random import randint
 import json
 from bs4 import BeautifulSoup
-from parseFoodData import parse_data
+from src.parseFoodData import parse_data
 
 baseUrl = "https://food.shahed.ac.ir"
 apiv0 = baseUrl + "/api/v0"
@@ -71,11 +71,10 @@ def extractLoginXsrfToken(loginPageData: dict) -> str:
     return loginPageData["antiForgery"]["value"]
 
 
-def loginForm(user, passw, captcha, token: str):
+def loginForm(user, passw, token: str):
     return {
         "username": user,
         "password": passw,
-        "Captcha": captcha,
         "idsrv.xsrf": token}
 
 
@@ -142,33 +141,36 @@ class ShahedFoodApi:
     def login_after_captcha(self,
                           loginPageData: dict,
                           uname, passw, capcha: str):
+        try:
+            resp = self.currentSession.post(
+                extractLoginUrl(loginPageData),
+                data=loginForm(
+                    uname, passw,
+                    extractLoginXsrfToken(loginPageData)
+                ))
 
-        resp = self.currentSession.post(
-            extractLoginUrl(loginPageData),
-            data=loginForm(
-                uname, passw, capcha,
-                extractLoginXsrfToken(loginPageData)
-            ))
-
-        assert resp.status_code in range(200, 300)
-
-        html = BeautifulSoup(resp.text, "html.parser")
-        form = html.find("form")
-        url = form["action"]
-        inputs = [(el["name"], el["value"]) for el in form.find_all("input")]
-
-        if url.startswith("{{"):
-            raise "login failed"
-        else:
-            resp = self.currentSession.post(url, data=inputs)
             assert resp.status_code in range(200, 300)
-            self.signedIn = True
+
+            html = BeautifulSoup(resp.text, "html.parser")
+            form = html.find("form")
+            url = form["action"]
+            inputs = [(el["name"], el["value"]) for el in form.find_all("input")]
+
+            if url.startswith("{{"):
+                raise "login failed"
+            else:
+                resp = self.currentSession.post(url, data=inputs)
+                assert resp.status_code in range(200, 300)
+                self.signedIn = True
+        except:
+            self.signedIn = False
+            return
 
     def credit(self) -> int:
         """
         returns the credit in Rials
         """
-        return to_json(self.c.get(f"{apiv0}/Credit"))
+        return to_json(self.currentSession.get(f"{apiv0}/credit"))
     
     def getFood(self):
         api_url = f"{apiv0}/Reservation?lastdate=&navigation=0"
@@ -204,24 +206,24 @@ class ShahedFoodApi:
             "Sec-Fetch-Site":"same-origin"
             }
         response = self.currentSession.post(api_url,data=f"{[food]}".encode('utf-8'),headers=headers)
-        return response.content
+        return response.content.decode('utf8').replace("'", '"')
 
 
     def is_captcha_enabled(self) -> bool:
-        return to_json(self.c.get(f"{apiv0}/Captcha?isactive=wehavecaptcha"))
+        return to_json(self.currentSession.get(f"{apiv0}/Captcha?isactive=wehavecaptcha"))
 
     def personal_info(self) -> dict:
-        return to_json(self.c.get(f"{apiv0}/Student"))
+        return to_json(self.currentSession.get(f"{apiv0}/Student"))
 
     def personal_notifs(self) -> dict:
-        return to_json(self.c.get(
+        return to_json(self.currentSession.get(
             f"{apiv0}/PersonalNotification?postname=LastNotifications"))
 
     def instant_sale(self) -> dict:
-        return to_json(self.c.get(f"{apiv0}/InstantSale"))
+        return to_json(self.currentSession.get(f"{apiv0}/InstantSale"))
 
     def available_banks(self) -> dict:
-        return to_json(self.c.get(f"{apiv0}/Chargecard"))
+        return to_json(self.currentSession.get(f"{apiv0}/Chargecard"))
 
     def financial_info(self, state=1) -> dict:
         """
@@ -229,16 +231,16 @@ class ShahedFoodApi:
             all = 1
             last = 2
         """
-        return to_json(self.c.get(f"{apiv0}/ReservationFinancial?state={state}"))
+        return to_json(self.currentSession.get(f"{apiv0}/ReservationFinancial?state={state}"))
 
     def reservation(self, week: int = 0) -> dict:
-        return to_json(self.c.get(f"{apiv0}/Reservation?lastdate=&navigation={week*7}"))
+        return to_json(self.currentSession.get(f"{apiv0}/Reservation?lastdate=&navigation={week*7}"))
 
     def register_invoice(self, bid, amount: int) -> dict:
-        return to_json(self.c.get(f"{apiv0}/Chargecard?IpgBankId={bid}&amount={amount}"))
+        return to_json(self.currentSession.get(f"{apiv0}/Chargecard?IpgBankId={bid}&amount={amount}"))
 
     def prepare_bank_transaction(self, invoiceId: int, amount: int) -> dict:
-        return to_json(self.c.post(f"{apiv0}/Chargecard", data={
+        return to_json(self.currentSession.post(f"{apiv0}/Chargecard", data={
             "amount": amount,
             "Applicant": "web",
             "invoicenumber": invoiceId}))
