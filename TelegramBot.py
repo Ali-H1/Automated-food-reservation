@@ -136,7 +136,7 @@ def signin(message):
         print(f"Username: {username}")
         print(f"Password: {encrypt_password(password)}")
         user = database.getByQuery({"username":username})
-        if not len(user) or user[0]["telid"] != user_id:
+        if not len(user):
             sfa = ShahedFoodApi()
             (login_data, capcha_binary) = sfa.login_before_captcha()
             sfa.login_after_captcha(
@@ -147,6 +147,20 @@ def signin(message):
                 bot.send_message(message.chat.id, "شما وارد شدید")
                 bot.send_message(message.chat.id, "راهنمای بات: \n- لیست غذا\n- روز های هفته\n- رزرو خودکار")
                 user_db_id = database.add({"username":username, "password":encrypt_password(password).decode('utf8').replace("'", '"'), "telid":user_id, "autoReserve":False, "session":0, "days":[]})
+                store_session(sfa.currentSession, user_db_id)
+            else:
+                bot.send_message(message.chat.id, "نام کاربری یا رمز عبور نادرست است")
+                signin(message)
+        elif user[0]["telid"] != user_id:
+            sfa = ShahedFoodApi()
+            (login_data, capcha_binary) = sfa.login_before_captcha()
+            sfa.login_after_captcha(
+            login_data,
+            username, password,
+            0)
+            if sfa.signedIn:
+                bot.send_message(message.chat.id, "شما وارد شدید")
+                bot.send_message(message.chat.id, "راهنمای بات: \n- لیست غذا\n- روز های هفته\n- رزرو خودکار")
                 store_session(sfa.currentSession, user_db_id)
             else:
                 bot.send_message(message.chat.id, "نام کاربری یا رمز عبور نادرست است")
