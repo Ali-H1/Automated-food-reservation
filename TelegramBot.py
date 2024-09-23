@@ -136,7 +136,7 @@ def signin(message):
         print(f"Username: {username}")
         print(f"Password: {encrypt_password(password)}")
         user = database.getByQuery({"username":username})
-        if not len(user):
+        if not len(user) or user[0]["telid"] != user_id:
             sfa = ShahedFoodApi()
             (login_data, capcha_binary) = sfa.login_before_captcha()
             sfa.login_after_captcha(
