@@ -5,12 +5,16 @@ from src.api import *
 from cryptography.fernet import Fernet
 import telebot
 import environmets
+import platform
 
 bot = telebot.TeleBot(environmets.tellApiKey, parse_mode=None)
 
 # Initialize the database
+db_path = './db/users.json' if platform.system() == 'Windows' else f'{environmets.dbPath}/users.json'
+
 database = db.getDb("./db/users.json")  # Replace with your actual database file
 
+key_path = 'secret.key' if platform.system() == 'Windows' else f'{environmets.keyPath}/secret.key'
 
 def load_key():
     return open("secret.key", "rb").read()
@@ -85,7 +89,10 @@ users = get_users_with_days(days_to_check)
 def reserve_food(user):
     sfa = ShahedFoodApi()
     sfa.currentSession = get_valid_session(sfa, user["id"])
-    food_list = sfa.getFood()
+    food_list = sfa.getFood(1)
+    if not food_list:
+        bot.send_message(user["telid"], f"برنامه غذایی هنوز اعلام نشده است")
+        return
     reserved = []
     for day in user["days"]:
         for food in food_list:
