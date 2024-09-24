@@ -141,7 +141,7 @@ def signin(message):
     @bot.message_handler(func=lambda msg: msg.chat.id == message.chat.id and mode =="password")
     def get_password(msg):
         nonlocal password, mode, login_data
-        mode = "username"
+        mode = "other"
         password = msg.text
         bot.send_message(message.chat.id, "چند لحظه صبر کنید...")
         print(f"Username: {username}")
