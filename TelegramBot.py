@@ -133,6 +133,7 @@ def signin(message):
                 bot.send_message(message.chat.id, "نام کابری معتبر نیست(فقط حروف انگلیسی)")
                 mode = "username"
                 valid = False
+                break
         if valid:
             bot.send_message(message.chat.id, "رمز عبور خود را وارد کنید")
             mode = "password"
