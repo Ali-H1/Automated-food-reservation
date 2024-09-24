@@ -8,14 +8,17 @@ import json
 import requests
 import ast
 from cryptography.fernet import Fernet
+import platform
 
-
-database=db.getDb("./db/users.json")
+db_path = './db/users.json' if platform.system() == 'Windows' else f'{environmets.dbPath}/users.json'
+database = db.getDb(db_path)  # Replace with your actual database file
 
 bot = telebot.TeleBot(environmets.tellApiKey, parse_mode=None)
 
+key_path = 'secret.key' if platform.system() == 'Windows' else f'{environmets.keyPath}/secret.key'
 def load_key():
-    return open("secret.key", "rb").read()
+    return open(key_path, "rb").read()
+
 
 # Function to encrypt a password
 def encrypt_password(password):
