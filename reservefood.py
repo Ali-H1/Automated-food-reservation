@@ -2,9 +2,33 @@ from pysondb import db
 import requests
 import json
 from src.api import *
-from TelegramBot import decrypt_password, encrypt_password
+from cryptography.fernet import Fernet
+import telebot
+import environmets
+
+bot = telebot.TeleBot(environmets.tellApiKey, parse_mode=None)
+
 # Initialize the database
 database = db.getDb("./db/users.json")  # Replace with your actual database file
+
+
+def load_key():
+    return open("secret.key", "rb").read()
+
+# Function to encrypt a password
+def encrypt_password(password):
+    key = load_key()
+    f = Fernet(key)
+    encrypted_password = f.encrypt(password.encode())
+    return encrypted_password
+
+# Function to decrypt an encrypted password
+def decrypt_password(encrypted_password):
+    key = load_key()
+    f = Fernet(key)
+    decrypted_password = f.decrypt(encrypted_password.encode('utf-8')).decode()
+    return decrypted_password
+
 
 def store_session(session, id):
     # Convert session cookies and headers to JSON serializable format
@@ -62,14 +86,22 @@ def reserve_food(user):
     sfa = ShahedFoodApi()
     sfa.currentSession = get_valid_session(sfa, user["id"])
     food_list = sfa.getFood()
+    reserved = []
     for day in user["days"]:
         for food in food_list:
             if food["DayName"] == day:
                 result = sfa.reserveFood(food)
+                if json.loads(result)[0]["StateCode"] in [0,2]:
+                    reserved.append(day)
                 print(json.loads(result)[0]["StateCode"], json.loads(result)[0]["StateMessage"])
+    if reserved:
+        bot.send_message(user["telid"], f"غذا برای روز های {reserved} رزرو شده است")
+    else:
+        bot.send_message(user["telid"], f"غذا برای هیچ روزی رزرو نشد!")
 
 all_users = database.getAll()
     
 # Check each user
 for user in all_users:
+    print(user["username"])
     reserve_food(user)
