@@ -127,11 +127,13 @@ def signin(message):
     def get_username(msg):
         nonlocal username, mode
         username = msg.text
+        valid = True
         for i in username:
             if i not in "0123456789":
                 bot.send_message(message.chat.id, "نام کابری معتبر نیست(فقط حروف انگلیسی)")
                 mode = "username"
-        else:
+                valid = False
+        if valid:
             bot.send_message(message.chat.id, "رمز عبور خود را وارد کنید")
             mode = "password"
 
