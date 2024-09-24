@@ -161,3 +161,4 @@ cython_debug/
 
 environmets.py
 *.key
+./db/users.json
