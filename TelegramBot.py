@@ -102,14 +102,20 @@ def set_bot_commands():
     ]
     bot.set_my_commands(commands)
 
+markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+item = telebot.types.KeyboardButton("ورود")
+markup.add(item)
+item2 = telebot.types.KeyboardButton("روزهای هفته")
+markup.add(item2)
+item3 = telebot.types.KeyboardButton("لیست غذا")
+markup.add(item3)
+item4 = telebot.types.KeyboardButton("رزرو خودکار")
+markup.add(item4)
+
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
-    markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-    item = telebot.types.KeyboardButton("ورود")
-    markup.add(item)
-    item2 = telebot.types.KeyboardButton("روز های هفته")
-    markup.add(item2)
-    bot.reply_to(message, "راهنمای بات: \n- ورود\n- لیست غذا\n- روز های هفته\n- رزرو خودکار")
+    # markup = telebot.types.ReplyKeyboardMarkup()
+    bot.reply_to(message, "راهنمای بات: \n- ورود\n- لیست غذا\n- روز های هفته\n- رزرو خودکار", reply_markup=markup)
 	
 
 
@@ -158,7 +164,7 @@ def signin(message):
                 user_db_id = database.add({"username":username, "password":encrypt_password(password).decode('utf8').replace("'", '"'), "telid":user_id, "chatid":message.chat.id, "autoReserve":False, "session":0, "days":[]})
                 store_session(sfa.currentSession, user_db_id)
                 bot.send_message(message.chat.id, "شما وارد شدید")
-                bot.send_message(message.chat.id, "راهنمای بات: \n- لیست غذا\n- روز های هفته\n- رزرو خودکار")
+                bot.send_message(message.chat.id, "راهنمای بات: \n- لیست غذا\n- روزهای هفته\n- رزرو خودکار", reply_markup=markup)
             else:
                 bot.send_message(message.chat.id, "نام کاربری یا رمز عبور نادرست است")
                 signin(message)
@@ -172,12 +178,12 @@ def signin(message):
             if sfa.signedIn:
                 store_session(sfa.currentSession, user[0]["id"])
                 bot.send_message(message.chat.id, "شما وارد شدید")
-                bot.send_message(message.chat.id, "راهنمای بات: \n- لیست غذا\n- روز های هفته\n- رزرو خودکار")
+                bot.send_message(message.chat.id, "راهنمای بات: \n- لیست غذا\n- روزهای هفته\n- رزرو خودکار", reply_markup=markup)
             else:
-                bot.send_message(message.chat.id, "نام کاربری یا رمز عبور نادرست است")
+                bot.send_message(message.chat.id, "نام کاربری یا رمز عبور نادرست است", reply_markup=markup)
                 signin(message)
         else:
-            bot.send_message(message.chat.id, "دستگاه دیگری قبلا با این حساب وارد شده است")
+            bot.send_message(message.chat.id, "دستگاه دیگری قبلا با این حساب وارد شده است", reply_markup=markup)
 
 
 @bot.message_handler(func=lambda message: message.text == 'لیست غذا')
@@ -196,7 +202,7 @@ def getFood(message):
     bot.send_message(user_id, result)
 
 
-@bot.message_handler(func=lambda message: message.text == 'روز های هفته')
+@bot.message_handler(func=lambda message: message.text == 'روزهای هفته')
 def setdays(message):
     user_id = message.from_user.id
     user = database.getByQuery({"telid":user_id})
@@ -239,7 +245,7 @@ def submenus(c):
         else:
             user["days"].remove("شنبه")
             database.updateById(user["id"],{"days":user["days"]})
-        bot.send_message(str(c.data[1]), f' روز های فعال:{user["days"]}')
+        bot.send_message(str(c.data[1]), f' روز های فعال:{user["days"]}', reply_markup=markup)
 
     elif c.data[0] == "1":
         if "یکشنبه" not in user["days"]:
@@ -248,7 +254,7 @@ def submenus(c):
         else:
             user["days"].remove("یکشنبه")
             database.updateById(user["id"],{"days":user["days"]})
-        bot.send_message(str(c.data[1]), f' روز های فعال:{user["days"]}')
+        bot.send_message(str(c.data[1]), f' روز های فعال:{user["days"]}', reply_markup=markup)
 
     elif c.data[0] == '2':
         if "دوشنبه" not in user["days"]:
@@ -257,7 +263,7 @@ def submenus(c):
         else:
             user["days"].remove("دوشنبه")
             database.updateById(user["id"],{"days":user["days"]})
-        bot.send_message(str(c.data[1]), f' روز های فعال:{user["days"]}')
+        bot.send_message(str(c.data[1]), f' روز های فعال:{user["days"]}', reply_markup=markup)
 
     elif c.data[0] == '3':
         if "سه شنبه" not in user["days"]:
@@ -266,7 +272,7 @@ def submenus(c):
         else:
             user["days"].remove("سه شنبه")
             database.updateById(user["id"],{"days":user["days"]})
-        bot.send_message(str(c.data[1]), f' روز های فعال:{user["days"]}')
+        bot.send_message(str(c.data[1]), f' روز های فعال:{user["days"]}', reply_markup=markup)
 
     elif c.data[0] == '4':
         if "چهارشنبه" not in user["days"]:
@@ -275,15 +281,15 @@ def submenus(c):
         else:
             user["days"].remove("چهارشنبه")
             database.updateById(user["id"],{"days":user["days"]})
-        bot.send_message(str(c.data[1]), f' روز های فعال:{user["days"]}')
+        bot.send_message(str(c.data[1]), f' روز های فعال:{user["days"]}', reply_markup=markup)
 
     elif c.data[0] == 'enable':
         database.updateById(user["id"],{"autoReserve":True})
         bot.send_message(str(c.data[1]), f' رزرو خودکار فعال شد')
-        bot.send_message(str(c.data[1]), f' روز های فعال:{user["days"]}')
+        bot.send_message(str(c.data[1]), f' روز های فعال:{user["days"]}', reply_markup=markup)
     elif c.data[0] == 'disable':
         database.updateById(user["id"],{"autoReserve":False})
-        bot.send_message(str(c.data[1]), f' رزرو خودکار غیرفعال شد')
+        bot.send_message(str(c.data[1]), f' رزرو خودکار غیرفعال شد', reply_markup=markup)
 
 # set_bot_commands()
 
