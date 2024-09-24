@@ -127,8 +127,13 @@ def signin(message):
     def get_username(msg):
         nonlocal username, mode
         username = msg.text
-        bot.send_message(message.chat.id, "رمز عبور خود را وارد کنید")
-        mode = "password"
+        for i in username:
+            if i not in "0123456789":
+                bot.send_message(message.chat.id, "نام کابری معتبر نیست(فقط حروف انگلیسی)")
+                mode = "username"
+        else:
+            bot.send_message(message.chat.id, "رمز عبور خود را وارد کنید")
+            mode = "password"
 
     @bot.message_handler(func=lambda msg: msg.chat.id == message.chat.id and mode =="password")
     def get_password(msg):
@@ -147,10 +152,10 @@ def signin(message):
             username, password,
             0)
             if sfa.signedIn:
-                bot.send_message(message.chat.id, "شما وارد شدید")
-                bot.send_message(message.chat.id, "راهنمای بات: \n- لیست غذا\n- روز های هفته\n- رزرو خودکار")
                 user_db_id = database.add({"username":username, "password":encrypt_password(password).decode('utf8').replace("'", '"'), "telid":user_id, "chatid":message.chat.id, "autoReserve":False, "session":0, "days":[]})
                 store_session(sfa.currentSession, user_db_id)
+                bot.send_message(message.chat.id, "شما وارد شدید")
+                bot.send_message(message.chat.id, "راهنمای بات: \n- لیست غذا\n- روز های هفته\n- رزرو خودکار")
             else:
                 bot.send_message(message.chat.id, "نام کاربری یا رمز عبور نادرست است")
                 signin(message)
@@ -162,9 +167,9 @@ def signin(message):
             username, password,
             0)
             if sfa.signedIn:
+                store_session(sfa.currentSession, user[0]["id"])
                 bot.send_message(message.chat.id, "شما وارد شدید")
                 bot.send_message(message.chat.id, "راهنمای بات: \n- لیست غذا\n- روز های هفته\n- رزرو خودکار")
-                store_session(sfa.currentSession, user[0]["id"])
             else:
                 bot.send_message(message.chat.id, "نام کاربری یا رمز عبور نادرست است")
                 signin(message)
@@ -176,11 +181,11 @@ def signin(message):
 def getFood(message):
     user_id = message.from_user.id
     user = database.getByQuery({"telid":user_id})
-    if len(user)==0:
+    if not user:
         signin(message)
         user = database.getByQuery({"telid":user_id})
     sfa = ShahedFoodApi()
-    sfa.currentSession = get_valid_session(sfa,user[0]["id"])
+    sfa.currentSession = get_valid_session(sfa, user[0]["id"])
     listOfFood = sfa.getFood()
     result = ""
     for food in listOfFood:
@@ -192,7 +197,7 @@ def getFood(message):
 def setdays(message):
     user_id = message.from_user.id
     user = database.getByQuery({"telid":user_id})
-    if len(user)==0:
+    if not user:
         signin(message)
         user = database.getByQuery({"telid":user_id})
     keyboard = telebot.types.InlineKeyboardMarkup()
@@ -207,7 +212,7 @@ def setdays(message):
 def setdays(message):
     user_id = message.from_user.id
     user = database.getByQuery({"telid":user_id})
-    if len(user)==0:
+    if not user:
         signin(message)
         user = database.getByQuery({"telid":user_id})
     status = "فعال " if user[0]["autoReserve"] else "غیرفعال"
