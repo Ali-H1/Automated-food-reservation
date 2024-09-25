@@ -100,13 +100,13 @@ def reserve_food(user):
                 result = sfa.reserveFood(food)
                 if json.loads(result)[0]["StateCode"] in [0,2]:
                     reserved.append(day)
-                print(json.loads(result)[0]["StateCode"], json.loads(result)[0]["StateMessage"])
+                print(json.loads(result)[0]["StateCode"])#, json.loads(result)[0]["StateMessage"])
     if reserved:
         bot.send_message(user["telid"], f"غذا برای روز های {reserved} رزرو شده است")
     else:
         bot.send_message(user["telid"], f"غذا برای هیچ روزی رزرو نشد!")
 
-all_users = database.getAll()
+all_users = database.getByQuery({"autoReserve":True})
     
 # Check each user
 for user in all_users:

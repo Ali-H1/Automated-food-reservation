@@ -102,22 +102,49 @@ def set_bot_commands():
     ]
     bot.set_my_commands(commands)
 
+###################################################################
 markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-item = telebot.types.KeyboardButton("ورود")
+item = telebot.types.KeyboardButton("🔓 ورود")
 markup.add(item)
-item2 = telebot.types.KeyboardButton("روزهای هفته")
-markup.add(item2)
-item3 = telebot.types.KeyboardButton("لیست غذا")
-markup.add(item3)
-item4 = telebot.types.KeyboardButton("لیست غذای هفته بعد")
-markup.add(item4)
-item5 = telebot.types.KeyboardButton("رزرو خودکار")
-markup.add(item5)
+item2 = telebot.types.KeyboardButton("📆 روزهای هفته")
+# markup.add(item2)
+item3 = telebot.types.KeyboardButton("🍽 لیست غذا")
+# markup.add(item3)
+item4 = telebot.types.KeyboardButton("🍽📆 لیست غذای هفته بعد")
+# markup.add(item4)
+item5 = telebot.types.KeyboardButton("🤖 رزرو خودکار")
+# markup.add(item5)
+markup.row(item4,item3)
+markup.row(item2,item5)
+item6 = telebot.types.KeyboardButton("⏲ رزرو آنی غذا")
+markup.add(item6)
+
+
+##############################################################
+def reserve_food(user):
+    sfa = ShahedFoodApi()
+    sfa.currentSession = get_valid_session(sfa, user["id"])
+    food_list = sfa.getFood(1)
+    if not food_list:
+        bot.send_message(user["telid"], f"برنامه غذایی هنوز اعلام نشده است")
+        return
+    reserved = []
+    for day in user["days"]:
+        for food in food_list:
+            if food["DayName"] == day:
+                result = sfa.reserveFood(food)
+                if json.loads(result)[0]["StateCode"] in [0,2]:
+                    reserved.append(day)
+                print(json.loads(result)[0]["StateCode"])#, json.loads(result)[0]["StateMessage"])
+    if reserved:
+        bot.send_message(user["telid"], f"غذا برای روز های {reserved} رزرو شده است")
+    else:
+        bot.send_message(user["telid"], f"غذا برای هیچ روزی رزرو نشد!\n{json.loads(result)[0]['StateMessage']}")
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
     # markup = telebot.types.ReplyKeyboardMarkup()
-    bot.reply_to(message, "راهنمای بات: \n- ورود\n- لیست غذا\n- روز های هفته\n- رزرو خودکار", reply_markup=markup)
+    bot.reply_to(message, "راهنمای بات: \n- ورود\n- لیست غذا\n- روز های هفته\n- رزرو خودکار\n- رزرو آنی غذا\n- لیست غذای هفته بعد", reply_markup=markup)
 	
 
 
@@ -166,6 +193,8 @@ def signin(message):
                 user_db_id = database.add({"username":username, "password":encrypt_password(password).decode('utf8').replace("'", '"'), "telid":user_id, "chatid":message.chat.id, "autoReserve":False, "session":0, "days":[]})
                 store_session(sfa.currentSession, user_db_id)
                 bot.send_message(message.chat.id, "شما وارد شدید")
+                if markup.keyboard[0][0]["text"] == "ورود":
+                    markup.keyboard[0].pop(0)
                 bot.send_message(message.chat.id, "راهنمای بات: \n- لیست غذا\n- روزهای هفته\n- رزرو خودکار", reply_markup=markup)
             else:
                 bot.send_message(message.chat.id, "نام کاربری یا رمز عبور نادرست است")
@@ -180,6 +209,8 @@ def signin(message):
             if sfa.signedIn:
                 store_session(sfa.currentSession, user[0]["id"])
                 bot.send_message(message.chat.id, "شما وارد شدید")
+                if markup.keyboard[0][0]["text"] == "ورود":
+                    markup.keyboard[0].pop(0)
                 bot.send_message(message.chat.id, "راهنمای بات: \n- لیست غذا\n- روزهای هفته\n- رزرو خودکار", reply_markup=markup)
             else:
                 bot.send_message(message.chat.id, "نام کاربری یا رمز عبور نادرست است", reply_markup=markup)
@@ -230,6 +261,14 @@ def getFood(message):
         result = result +  f"\n{str(food['DayName'])}  {str(food['Date'])} \n {str(food['FoodName'])} \t {str(food['Price'])}\n"
     bot.send_message(user_id, result)
 
+@bot.message_handler(func=lambda message: message.text == 'رزرو آنی غذا')
+def getFood(message):
+    user_id = message.from_user.id
+    user = database.getByQuery({"telid":user_id})
+    if not user:
+        signin(message)
+        user = database.getByQuery({"telid":user_id})
+    reserve_food(user[0])
 
 @bot.message_handler(func=lambda message: message.text == 'روزهای هفته')
 def setdays(message):
