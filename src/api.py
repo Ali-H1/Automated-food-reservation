@@ -15,7 +15,7 @@ foods = {
     "برنج": "🍚",          # Rice
     "پلو": "🍚",            # Rice
     "میگو": "🦐",          # Shrimp
-    "خورشت": "🍛",        # Stew
+    "خورش": "🍛",          # Stew
     "کوکو": "🧆",          # koo koooooo
     "کتلت": "🥮",          # cutlet
     "زیره": "🍘",          # Caraway
@@ -188,7 +188,7 @@ class ShahedFoodApi:
             "upgrade-insecure-requests": "1"
         }
         response = self.currentSession.get(api_url)
-        if response.status_code == 200:
+        if "<html>" not in response.content.decode('utf8').replace("'", '"'):
             return parse_data(response.content.decode('utf8').replace("'", '"'))
         else:
             return "error"

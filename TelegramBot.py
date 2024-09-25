@@ -63,7 +63,7 @@ def restore_session(id, key="session"):
 def is_session_valid(session):
     """Checks if the current session is still valid by accessing a protected page."""
     response = session.get(f"{apiv0}/credit")
-    if response.status_code == 200:
+    if response.status_code == 200 and "<html>" not in response.content.decode('utf8').replace("'", '"'):
         return True
     else:
         return False
@@ -109,9 +109,9 @@ item2 = telebot.types.KeyboardButton("روزهای هفته")
 markup.add(item2)
 item3 = telebot.types.KeyboardButton("لیست غذا")
 markup.add(item3)
-item4 = telebot.types.KeyboardButton("رزرو خودکار")
+item4 = telebot.types.KeyboardButton("لیست غذای هفته بعد")
 markup.add(item4)
-item5 = telebot.types.KeyboardButton("لیست غذای هفته بعد")
+item5 = telebot.types.KeyboardButton("رزرو خودکار")
 markup.add(item5)
 
 @bot.message_handler(commands=['start', 'help'])
@@ -199,6 +199,12 @@ def getFood(message):
     sfa.currentSession = get_valid_session(sfa, user[0]["id"])
     listOfFood = sfa.getFood()
     result = ""
+    if not listOfFood:
+        bot.send_message(user_id, f"برنامه غذایی هنوز اعلام نشده است")
+        return
+    if listOfFood == "error":
+        bot.send_message(user_id, f"مشکلی پیش آمده است")
+        return
     for food in listOfFood:
         result = result +  f"\n{str(food['DayName'])}  {str(food['Date'])} \n {str(food['FoodName'])} \t {str(food['Price'])}\n"
     bot.send_message(user_id, result)
