@@ -188,7 +188,7 @@ class ShahedFoodApi:
             "upgrade-insecure-requests": "1"
         }
         response = self.currentSession.get(api_url)
-        if "<html>" not in response.content.decode('utf8').replace("'", '"'):
+        if "<html" not in response.content.decode('utf8').replace("'", '"'):
             return parse_data(response.content.decode('utf8').replace("'", '"'))
         else:
             return "error"

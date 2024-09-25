@@ -63,7 +63,7 @@ def restore_session(id, key="session"):
 def is_session_valid(session):
     """Checks if the current session is still valid by accessing a protected page."""
     response = session.get(f"{apiv0}/credit")
-    if response.status_code == 200 and "<html>" not in response.content.decode('utf8').replace("'", '"'):
+    if response.status_code == 200 and "<html" not in response.content.decode('utf8').replace("'", '"'):
         return True
     else:
         return False
