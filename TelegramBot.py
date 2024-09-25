@@ -144,12 +144,12 @@ def reserve_food(user):
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
     # markup = telebot.types.ReplyKeyboardMarkup()
-    bot.reply_to(message, "راهنمای بات: \n- ورود\n- لیست غذا\n- روز های هفته\n- رزرو خودکار\n- رزرو آنی غذا\n- لیست غذای هفته بعد", reply_markup=markup)
+    bot.reply_to(message, "راهنمای بات: \n- 🔓 ورود\n- 🍽 لیست غذا\n- روز های هفته\n- 🤖 رزرو خودکار\n- ⏲ رزرو آنی غذا\n- 🍽📆 لیست غذای هفته بعد", reply_markup=markup)
 	
 
 
 # Sign-in command
-@bot.message_handler(func=lambda message: message.text == 'ورود')
+@bot.message_handler(func=lambda message: message.text == '🔓 ورود')
 def signin(message):
     user_id = message.from_user.id
     bot.send_message(user_id, "نام کاربری را وارد کنید")
@@ -193,9 +193,9 @@ def signin(message):
                 user_db_id = database.add({"username":username, "password":encrypt_password(password).decode('utf8').replace("'", '"'), "telid":user_id, "chatid":message.chat.id, "autoReserve":False, "session":0, "days":[]})
                 store_session(sfa.currentSession, user_db_id)
                 bot.send_message(message.chat.id, "شما وارد شدید")
-                if markup.keyboard[0][0]["text"] == "ورود":
+                if markup.keyboard[0][0]["text"] == "🔓 ورود":
                     markup.keyboard[0].pop(0)
-                bot.send_message(message.chat.id, "راهنمای بات: \n- لیست غذا\n- روزهای هفته\n- رزرو خودکار", reply_markup=markup)
+                bot.send_message(message.chat.id, "راهنمای بات: \n- 🍽 لیست غذا\n- 📆 روزهای هفته\n- 🤖 رزرو خودکار", reply_markup=markup)
             else:
                 bot.send_message(message.chat.id, "نام کاربری یا رمز عبور نادرست است")
                 signin(message)
@@ -209,9 +209,9 @@ def signin(message):
             if sfa.signedIn:
                 store_session(sfa.currentSession, user[0]["id"])
                 bot.send_message(message.chat.id, "شما وارد شدید")
-                if markup.keyboard[0][0]["text"] == "ورود":
+                if markup.keyboard[0][0]["text"] == "🔓 ورود":
                     markup.keyboard[0].pop(0)
-                bot.send_message(message.chat.id, "راهنمای بات: \n- لیست غذا\n- روزهای هفته\n- رزرو خودکار", reply_markup=markup)
+                bot.send_message(message.chat.id, "راهنمای بات: \n- 🍽 لیست غذا\n- 📆 روزهای هفته\n- 🤖 رزرو خودکار", reply_markup=markup)
             else:
                 bot.send_message(message.chat.id, "نام کاربری یا رمز عبور نادرست است", reply_markup=markup)
                 signin(message)
@@ -219,7 +219,7 @@ def signin(message):
             bot.send_message(message.chat.id, "دستگاه دیگری قبلا با این حساب وارد شده است", reply_markup=markup)
 
 
-@bot.message_handler(func=lambda message: message.text == 'لیست غذا')
+@bot.message_handler(func=lambda message: message.text == '🍽 لیست غذا')
 def getFood(message):
     user_id = message.from_user.id
     user = database.getByQuery({"telid":user_id})
@@ -240,7 +240,7 @@ def getFood(message):
         result = result +  f"\n{str(food['DayName'])}  {str(food['Date'])} \n {str(food['FoodName'])} \t {str(food['Price'])}\n"
     bot.send_message(user_id, result)
 
-@bot.message_handler(func=lambda message: message.text == 'لیست غذای هفته بعد')
+@bot.message_handler(func=lambda message: message.text == '🍽📆 لیست غذای هفته بعد')
 def getFood(message):
     user_id = message.from_user.id
     user = database.getByQuery({"telid":user_id})
@@ -261,7 +261,7 @@ def getFood(message):
         result = result +  f"\n{str(food['DayName'])}  {str(food['Date'])} \n {str(food['FoodName'])} \t {str(food['Price'])}\n"
     bot.send_message(user_id, result)
 
-@bot.message_handler(func=lambda message: message.text == 'رزرو آنی غذا')
+@bot.message_handler(func=lambda message: message.text == '⏲ رزرو آنی غذا')
 def getFood(message):
     user_id = message.from_user.id
     user = database.getByQuery({"telid":user_id})
@@ -270,7 +270,7 @@ def getFood(message):
         user = database.getByQuery({"telid":user_id})
     reserve_food(user[0])
 
-@bot.message_handler(func=lambda message: message.text == 'روزهای هفته')
+@bot.message_handler(func=lambda message: message.text == '📆 روزهای هفته')
 def setdays(message):
     user_id = message.from_user.id
     user = database.getByQuery({"telid":user_id})
@@ -285,7 +285,7 @@ def setdays(message):
     keyboard.add(telebot.types.InlineKeyboardButton('چهار شنبه', callback_data=str(['4',message.chat.id])))
     bot.send_message(message.chat.id, f'روز های که میخواهید رزرو کنید را مشخص کنید\n روز های فعال:{user[0]["days"]}', reply_markup=keyboard)
 
-@bot.message_handler(func=lambda message: message.text == 'رزرو خودکار')
+@bot.message_handler(func=lambda message: message.text == '🤖 رزرو خودکار')
 def setdays(message):
     user_id = message.from_user.id
     user = database.getByQuery({"telid":user_id})
