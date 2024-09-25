@@ -188,7 +188,10 @@ class ShahedFoodApi:
             "upgrade-insecure-requests": "1"
         }
         response = self.currentSession.get(api_url)
-        return parse_data(response.content.decode('utf8').replace("'", '"'))
+        if response.status_code == 200:
+            return parse_data(response.content.decode('utf8').replace("'", '"'))
+        else:
+            return "error"
     
     def reserveFood(self,food):
         api_url = f"{apiv0}/Reservation"

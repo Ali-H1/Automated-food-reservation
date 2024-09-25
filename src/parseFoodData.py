@@ -4,6 +4,7 @@ import json
 
 def parse_data(data):
     f = open('parsed_data.txt', 'w', encoding='utf-8')
+    print(data)
     data = json.loads(data)
     # data = data["ArrayOfDietMenu"]["DietMenu"]
     dayId={'شنبه':2,'یکشنبه':5,'دوشنبه':8,'سه شنبه':11,'چهارشنبه':14}

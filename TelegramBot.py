@@ -111,6 +111,8 @@ item3 = telebot.types.KeyboardButton("لیست غذا")
 markup.add(item3)
 item4 = telebot.types.KeyboardButton("رزرو خودکار")
 markup.add(item4)
+item5 = telebot.types.KeyboardButton("لیست غذای هفته بعد")
+markup.add(item5)
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
@@ -197,6 +199,27 @@ def getFood(message):
     sfa.currentSession = get_valid_session(sfa, user[0]["id"])
     listOfFood = sfa.getFood()
     result = ""
+    for food in listOfFood:
+        result = result +  f"\n{str(food['DayName'])}  {str(food['Date'])} \n {str(food['FoodName'])} \t {str(food['Price'])}\n"
+    bot.send_message(user_id, result)
+
+@bot.message_handler(func=lambda message: message.text == 'لیست غذای هفته بعد')
+def getFood(message):
+    user_id = message.from_user.id
+    user = database.getByQuery({"telid":user_id})
+    if not user:
+        signin(message)
+        user = database.getByQuery({"telid":user_id})
+    sfa = ShahedFoodApi()
+    sfa.currentSession = get_valid_session(sfa, user[0]["id"])
+    listOfFood = sfa.getFood(1)
+    result = ""
+    if not listOfFood:
+        bot.send_message(user_id, f"برنامه غذایی هنوز اعلام نشده است")
+        return
+    if listOfFood == "error":
+        bot.send_message(user_id, f"مشکلی پیش آمده است")
+        return
     for food in listOfFood:
         result = result +  f"\n{str(food['DayName'])}  {str(food['Date'])} \n {str(food['FoodName'])} \t {str(food['Price'])}\n"
     bot.send_message(user_id, result)
