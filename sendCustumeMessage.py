@@ -37,4 +37,4 @@ users = database.getAll()
 message = input("enter your message:")
 
 for user in users:
-    bot.send_message(user["telid"],message)
+    bot.send_message(user["telid"],message.encode("utf-8"))
