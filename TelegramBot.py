@@ -225,7 +225,7 @@ def signin(message):
                         name += message.from_user.first_name + message.from_user.last_name
                     else:
                         name += message.from_user.first_name
-                user_db_id = database.add({"username":username, "password":encrypt_password(password).decode('utf8').replace("'", '"'), "telid":user_id, "chatid":message.chat.id,"name":name,"username":message.from_user.username, "autoReserve":False, "session":0, "days":[]})
+                user_db_id = database.add({"username":username, "password":encrypt_password(password).decode('utf8').replace("'", '"'), "telid":user_id, "chatid":message.chat.id,"name":name,"tel_username":message.from_user.username, "autoReserve":False, "session":0, "days":[]})
                 store_session(sfa.currentSession, user_db_id)
                 bot.send_message(message.chat.id, "شما وارد شدید")
                 if markup.keyboard[0][0]["text"] == "🔓 ورود":
