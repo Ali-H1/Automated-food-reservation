@@ -100,7 +100,7 @@ def reserve_food(user):
                 result = sfa.reserveFood(food)
                 if json.loads(result)[0]["StateCode"] in [0,2]:
                     reserved.append(day)
-                print(json.loads(result)[0]["StateCode"], str(json.loads(result)[0]["StateMessage"]))
+                print(json.loads(result)[0]["StateCode"])#), str(json.loads(result)[0]["StateMessage"]))
     if reserved:
         bot.send_message(user["telid"], f"غذا برای روز های {reserved} رزرو شده است")
     else:
