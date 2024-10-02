@@ -117,14 +117,15 @@ item5 = telebot.types.KeyboardButton("🤖 رزرو خودکار")
 markup.row(item4,item3)
 markup.row(item2,item5)
 item6 = telebot.types.KeyboardButton("⏲ رزرو آنی غذا")
-markup.add(item6)
+item7 = telebot.types.KeyboardButton('⏲  رزرو آنی غذا هفته بعد')
+markup.row(item6,item7)
 
 
 ##############################################################
-def reserve_food(user):
+def reserve_food(user, week):
     sfa = ShahedFoodApi()
     sfa.currentSession = get_valid_session(sfa, user["id"])
-    food_list = sfa.getFood(1)
+    food_list = sfa.getFood(week)
     if not food_list:
         bot.send_message(user["telid"], f"برنامه غذایی هنوز اعلام نشده است")
         return
@@ -303,7 +304,17 @@ def getFood(message):
     if not user:
         signin(message)
         user = database.getByQuery({"telid":user_id})
-    reserve_food(user[0])
+    reserve_food(user[0],0)
+
+@bot.message_handler(func=lambda message: message.text == '⏲  رزرو آنی غذا هفته بعد')
+def getFood(message):
+    user_id = message.from_user.id
+    user = database.getByQuery({"telid":user_id})
+    if not user:
+        signin(message)
+        user = database.getByQuery({"telid":user_id})
+    reserve_food(user[0],1)
+
 
 @bot.message_handler(func=lambda message: message.text == '📆 روزهای هفته')
 def setdays(message):
